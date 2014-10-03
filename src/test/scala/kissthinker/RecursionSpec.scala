@@ -167,16 +167,16 @@ class RecursionSpec extends Specification {
       }
 
       def ys(levels: Int): Vector[Vector[String]] = {
-        def y(level: Int, remainingLevels: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
-          if (remainingLevels == 0) yBlock(level)
-          else y(level + 1, remainingLevels - 1, yBlock(level) ++ ys)
+        def y(level: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
+          if (level > levels) ys
+          else y(level + 1, yBlock(level) ++ ys)
         }
 
         val topFiller = for {
           r <- (1 to (63 - 16 * levels)).toVector
         } yield Vector("_" * 100)
 
-        topFiller ++ y(1, levels - 1, Vector.empty[Vector[String]])
+        topFiller ++ y(1, Vector.empty[Vector[String]])
       }
 
       ys(2).foreach { r => println(r.mkString) }
