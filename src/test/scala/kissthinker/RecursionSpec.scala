@@ -135,8 +135,15 @@ class RecursionSpec extends Specification {
     """Creating a Fractal Tree from Y-shaped branches
        63 rows and 100 columns
        16 character each for height of top and bottom half of Y""" in {
-      def yBlock(width: Int, height: Int): Vector[Vector[String]] = {
-        def y = {
+      def yBlock(level: Int): Vector[Vector[String]] = {
+        val width = 33 / level
+        val height = 16 / level
+
+        val filler = for {
+          r <- (1 until width).toVector
+        } yield Vector("_" * ((100 - width) / 2))
+
+        val y = {
           val topY = for {
             r <- (height to 1 by -1).toVector
           } yield {
@@ -151,22 +158,18 @@ class RecursionSpec extends Specification {
           topY ++ bottomY
         }
 
-        val filler = for {
-          r <- (1 to 32).toVector
-        } yield Vector("_" * ((100 - 33) / 2))
+        def constructYs(level: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
+          if (level == 1) ys
+          else constructYs(level - 1, ys.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
+        }
 
-        val block = y
-
-        val filler_block = filler.zip(block).map { case (v1, v2) => v1 ++ v2 }
-        val filler_block_filler = filler_block.zip(filler).map { case (v1, v2) => v1 ++ v2 }
-
-        filler_block_filler
+        constructYs(level, filler.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
       }
 
       def ys(levels: Int): Vector[Vector[String]] = {
         def y(level: Int, remainingLevels: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
-          if (remainingLevels == 0) yBlock(33 / level, 16 / level)
-          else y(level + 1, remainingLevels - 1, yBlock(33 / level, 16 / level) ++ ys)
+          if (remainingLevels == 0) yBlock(level)
+          else y(level + 1, remainingLevels - 1, yBlock(level) ++ ys)
         }
 
         val topFiller = for {
@@ -176,7 +179,7 @@ class RecursionSpec extends Specification {
         topFiller ++ y(1, levels - 1, Vector.empty[Vector[String]])
       }
 
-      ys(1).foreach { r => println(r.mkString) }
+      ys(2).foreach { r => println(r.mkString) }
       "1" mustEqual "1"
     }
   }
