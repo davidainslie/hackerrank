@@ -1,0 +1,10 @@
+/RUNNING_PID
+.history
+/.idea
+/.idea_modules
+/*.iml
+/.settings
+/logs/
+/project/project/
+/project/target/
+/target/
