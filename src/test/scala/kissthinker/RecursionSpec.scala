@@ -143,6 +143,10 @@ class RecursionSpec extends Specification {
           r <- (1 to 2 * height).toVector
         } yield Vector("_" * ((width + 1) / 2) * (level - 1), "_" * (width - 1))
 
+        val lastFiller = for {
+          r <- (1 to 2 * height).toVector
+        } yield Vector("_" * ((width + 1) / 2) * (level - 1))
+
         val filler = for {
           r <- (1 to 2 * height).toVector
         } yield Vector("_" * width)
@@ -167,7 +171,7 @@ class RecursionSpec extends Specification {
           else constructYBlock(level - 1, ys.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
         }
 
-        constructYBlock(level, firstFiller.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
+        constructYBlock(level, firstFiller.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 }).zip(lastFiller).map { case (v1, v2) => v1 ++ v2 }
       }
 
       def ys(levels: Int): Vector[Vector[String]] = {
@@ -184,6 +188,9 @@ class RecursionSpec extends Specification {
       }
 
       ys(2).foreach { r => println(r.mkString) }
+
+      //io.Source.stdin.getLines()
+
       "1" mustEqual "1"
     }
   }
