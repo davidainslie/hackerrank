@@ -168,10 +168,11 @@ class RecursionSpec extends Specification {
 
         def constructYBlock(level: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
           if (level == 1) ys
-          else constructYBlock(level - 1, ys.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
+          else constructYBlock(level - 1, ys.zip(y).map { case (v1, v2) => v1 ++ v2 } zip filler map { case (v1, v2) => v1 ++ v2 })
         }
 
-        constructYBlock(level, firstFiller.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 }).zip(lastFiller).map { case (v1, v2) => v1 ++ v2 }
+        constructYBlock(level, firstFiller.zip(y).map { case (v1, v2) => v1 ++ v2 }
+          zip filler map { case (v1, v2) => v1 ++ v2 }) zip lastFiller map { case (v1, v2) => v1 ++ v2 }
       }
 
       def ys(levels: Int): Vector[Vector[String]] = {
@@ -184,13 +185,14 @@ class RecursionSpec extends Specification {
           r <- (1 to (63 - 16 * (1 + levels))).toVector
         } yield Vector("_" * 100)
 
-
-        topFiller ++ y(1, Vector.empty[Vector[String]])
+        topFiller ++ y(1, Vector.empty[Vector[String]]).map { v => Vector(v.mkString.take(100)) }
       }
 
-      ys(2).foreach { r => println(r.mkString) }
+      //io.Source.stdin.getLines().foreach { line => ys(line.toInt) }
 
-      //io.Source.stdin.getLines()
+      ys(1).foreach { r => println(r.mkString) }
+
+
 
       "1" mustEqual "1"
     }
