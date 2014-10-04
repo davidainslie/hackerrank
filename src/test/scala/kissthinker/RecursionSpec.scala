@@ -136,34 +136,38 @@ class RecursionSpec extends Specification {
        63 rows and 100 columns
        16 character each for height of top and bottom half of Y""" in {
       def yBlock(level: Int): Vector[Vector[String]] = {
-        val width = 33 / level
+        val width = 34 / level
         val height = 16 / level
 
+        val firstFiller = for {
+          r <- (1 to 2 * height).toVector
+        } yield Vector("_" * ((width + 1) / 2) * (level - 1), "_" * (width - 1))
+
         val filler = for {
-          r <- (1 until width).toVector
-        } yield Vector("_" * ((100 - width) / 2))
+          r <- (1 to 2 * height).toVector
+        } yield Vector("_" * width)
 
         val y = {
           val topY = for {
             r <- (height to 1 by -1).toVector
           } yield {
-            val numberOfInnnerFillers = 2 * r - 1
-            Vector("_" * (height - 1 - numberOfInnnerFillers / 2), "1", "_" * numberOfInnnerFillers, "1", "_" * (height - 1 - numberOfInnnerFillers / 2))
+            val numberOfInnerFillers = 2 * r - 1
+            Vector("_" * (width / 2 - 1 - numberOfInnerFillers / 2), "1", "_" * numberOfInnerFillers, "1", "_" * (width / 2 - 1 - numberOfInnerFillers / 2))
           }
 
           val bottomY = for {
             r <- (1 to height).toVector
-          } yield Vector("_" * height, "1", "_" * height)
+          } yield Vector("_" * (width / 2), "1", "_" * (width / 2))
 
           topY ++ bottomY
         }
 
-        def constructYs(level: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
+        def constructYBlock(level: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
           if (level == 1) ys
-          else constructYs(level - 1, ys.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
+          else constructYBlock(level - 1, ys.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
         }
 
-        constructYs(level, filler.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
+        constructYBlock(level, firstFiller.zip(y).map { case (v1, v2) => v1 ++ v2 }.zip(filler).map { case (v1, v2) => v1 ++ v2 })
       }
 
       def ys(levels: Int): Vector[Vector[String]] = {
@@ -173,7 +177,7 @@ class RecursionSpec extends Specification {
         }
 
         val topFiller = for {
-          r <- (1 to (63 - 16 * levels)).toVector
+          r <- (1 until (63 - 16 * levels)).toVector
         } yield Vector("_" * 100)
 
         topFiller ++ y(1, Vector.empty[Vector[String]])
