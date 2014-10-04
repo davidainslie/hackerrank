@@ -145,7 +145,7 @@ class RecursionSpec extends Specification {
 
         val lastFiller = for {
           r <- (1 to 2 * height).toVector
-        } yield Vector("_" * ((width + 1) / 2) * (level - 1))
+        } yield Vector("_" * (width / 2) * (level - 1))
 
         val filler = for {
           r <- (1 to 2 * height).toVector
@@ -181,8 +181,9 @@ class RecursionSpec extends Specification {
         }
 
         val topFiller = for {
-          r <- (1 until (63 - 16 * levels)).toVector
+          r <- (1 to (63 - 16 * (1 + levels))).toVector
         } yield Vector("_" * 100)
+
 
         topFiller ++ y(1, Vector.empty[Vector[String]])
       }
