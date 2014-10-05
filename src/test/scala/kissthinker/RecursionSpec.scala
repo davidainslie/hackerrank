@@ -132,67 +132,66 @@ class RecursionSpec extends Specification {
       swap("abcdpqrs") mustEqual "badcqpsr"
     }
 
+    // TODO - Incomplete
     """Creating a Fractal Tree from Y-shaped branches
        63 rows and 100 columns
        16 character each for height of top and bottom half of Y""" in {
-      def yBlock(level: Int): Vector[Vector[String]] = {
-        val width = 34 / level
-        val height = 16 / level
-
-        val firstFiller = for {
-          r <- (1 to 2 * height).toVector
-        } yield Vector("_" * ((width + 1) / 2) * (level - 1), "_" * (width - 1))
-
-        val lastFiller = for {
-          r <- (1 to 2 * height).toVector
-        } yield Vector("_" * (width / 2) * (level - 1))
-
-        val filler = for {
-          r <- (1 to 2 * height).toVector
-        } yield Vector("_" * width)
-
-        val y = {
-          val topY = for {
-            r <- (height to 1 by -1).toVector
-          } yield {
-            val numberOfInnerFillers = 2 * r - 1
-            Vector("_" * (width / 2 - 1 - numberOfInnerFillers / 2), "1", "_" * numberOfInnerFillers, "1", "_" * (width / 2 - 1 - numberOfInnerFillers / 2))
-          }
-
-          val bottomY = for {
-            r <- (1 to height).toVector
-          } yield Vector("_" * (width / 2), "1", "_" * (width / 2))
-
-          topY ++ bottomY
-        }
-
-        def constructYBlock(level: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
-          if (level == 1) ys
-          else constructYBlock(level - 1, ys.zip(y).map { case (v1, v2) => v1 ++ v2 } zip filler map { case (v1, v2) => v1 ++ v2 })
-        }
-
-        constructYBlock(level, firstFiller.zip(y).map { case (v1, v2) => v1 ++ v2 }
-          zip filler map { case (v1, v2) => v1 ++ v2 }) zip lastFiller map { case (v1, v2) => v1 ++ v2 }
-      }
-
       def ys(levels: Int): Vector[Vector[String]] = {
+        val width = 32
+        val height = 32
+
         def y(level: Int, ys: Vector[Vector[String]]): Vector[Vector[String]] = {
-          if (level > levels) ys
-          else y(level + 1, yBlock(level) ++ ys)
+          if (level > levels) {
+            ys
+          } else {
+            val Y = {
+              val rows = (0 until (height / (2 * level))).toVector
+
+              val topY = for {
+                r <- rows
+              } yield {
+                Vector("_" * r,
+                       "1",
+                       "_" * (((width - 1) / level) - 2 * r),
+                       "1",
+                       "_" * r)
+              }
+
+              val bottomY = for {
+                r <- rows
+              } yield Vector("_" * (width / (2 * level)),
+                             "1",
+                             "_" * (width / (2 * level)))
+
+              val spacerFiller = for {
+                r <- rows ++ rows
+              } yield Vector("_" * ((width - 1) / level))
+
+              def construct(level: Int, block: Vector[Vector[String]]): Vector[Vector[String]] =
+                if (level == 1) block
+                else construct(level - 1, block.zip(spacerFiller).map { case (v1, v2) => v1 ++ v2 } zip (topY ++ bottomY) map { case (v1, v2) => v1 ++ v2 })
+
+
+              construct(level, topY ++ bottomY)
+            }
+
+            y(level + 1, Y ++ ys)
+          }
         }
 
         val topFiller = for {
           r <- (1 to (63 - 16 * (1 + levels))).toVector
         } yield Vector("_" * 100)
 
-        topFiller ++ y(1, Vector.empty[Vector[String]]).map { v => Vector(v.mkString.take(100)) }
+        topFiller ++ y(1, Vector.empty[Vector[String]]).map { v =>
+          val block = v.mkString
+          val leftFiller = "_" * ((100 - block.size) / 2)
+          val rightFiller = "_" * ((101 - block.size) / 2)
+          Vector(leftFiller, block, rightFiller)
+        }
       }
 
-      //io.Source.stdin.getLines().foreach { line => ys(line.toInt) }
-
-      ys(1).foreach { r => println(r.mkString) }
-
-
+      ys(2).foreach { r => println(r.mkString) }
 
       "1" mustEqual "1"
     }
